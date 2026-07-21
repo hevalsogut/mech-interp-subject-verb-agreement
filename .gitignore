@@ -1,0 +1,17 @@
+# Raw/working notebook — contains failed debugging attempts, not for publication
+mech_interp_project.ipynb
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
+
+# Claude Code local settings
+.claude/
