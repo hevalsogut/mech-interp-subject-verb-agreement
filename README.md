@@ -127,4 +127,4 @@ Computer Engineering Student | AI & Automation Engineer
 
 ## License
 
-MIT License feel free to use, cite, or build upon this work.
+This project is licensed under the [MIT License](LICENSE) — feel free to use, cite, or build upon this work.
