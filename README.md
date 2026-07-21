@@ -2,6 +2,8 @@
 
 How does a language model know that "The cat that sat near the dogs **is**" requires a singular verb? This project opens up GPT-2 Small and identifies the specific attention heads responsible for subject-verb number agreement — showing that just 4 out of 144 heads account for 83% of the model's ability to match verbs to their grammatical subjects.
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hevalsogut/mech-interp-subject-verb-agreement/blob/main/mech_interp_subject_verb_agreement.ipynb)
+
 ## Key Findings
 
 ### The Circuit
@@ -120,8 +122,9 @@ The full analysis runs on Google Colab's free tier (GPT-2 Small fits easily in m
 ## Author
 
 **Heval Söğüt**
-Computer Engineering Student | AI & Automation Engineer
+AI & Automation Engineer
 
+- Website: [hevalsogut.com](https://hevalsogut.com)
 - GitHub: [@hevalsogut](https://github.com/hevalsogut)
 - LinkedIn: [hevalsogut](https://linkedin.com/in/hevalsogut)
 
