@@ -1,6 +1,6 @@
 # Dissecting Subject-Verb Agreement in GPT-2 Small: A Mechanistic Interpretability Study
 
-How does a language model know that "The cat that sat near the dogs **is**" requires a singular verb? This project opens up GPT-2 Small and identifies the specific attention heads responsible for subject-verb number agreement — showing that just 4 out of 144 heads account for 83% of the model's ability to match verbs to their grammatical subjects.
+How does a language model know that "The cat that sat near the dogs **is**" requires a singular verb? This project opens up GPT-2 Small and identifies the specific attention heads responsible for subject-verb number agreement. A stable 3-head core — L7H4 (26%), L8H5 (25%), and L10H9 (17%) — carries most of the causal effect, followed by a diffuse tail of smaller contributors.
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hevalsogut/mech-interp-subject-verb-agreement/blob/main/mech_interp_subject_verb_agreement.ipynb)
 
@@ -8,9 +8,9 @@ How does a language model know that "The cat that sat near the dogs **is**" requ
 
 ### The Circuit
 
-We identified a sparse, functionally specialized circuit for subject-verb agreement:
+A first pass over 8 hand-written sentences (Section 6) pointed to a sparse, functionally specialized circuit for subject-verb agreement. A larger 119-sentence run (Section 9) later validated and refined these numbers — see **Robustness (n=119)** below — but the qualitative picture held:
 
-| Head      | Role                     | Causal Effect | Behavior                                                                        |
+| Head      | Role                     | Causal Effect (n=8) | Behavior                                                              |
 | --------- | ------------------------ | ------------- | ------------------------------------------------------------------------------- |
 | **L4H3**  | Subject Detector         | 11.7%         | Attends from verb → subject noun with 30–60% weight, ignoring distractors (~0%) |
 | **L7H4**  | Primary Decision Maker   | 31.3%         | Reads processed representations; pushes output toward correct verb form         |
@@ -18,19 +18,19 @@ We identified a sparse, functionally specialized circuit for subject-verb agreem
 | **L10H9** | Late Refinement          | 13.7%         | Final-stage adjustment before the unembedding layer                             |
 
 ![Causal Heatmap](figures/causal_heatmap.png)
-_Causal effect of all 144 attention heads on subject-verb agreement, averaged across 8 test sentences (Section 6). L7H4, L8H5, L10H9, and L4H3 stand out as the dominant contributors._
+_Causal effect of all 144 attention heads on subject-verb agreement, averaged across 8 test sentences (Section 6). In this first pass L7H4, L8H5, and L10H9 stand out as the dominant contributors; L4H3 ranked 4th here but drops to ~6th in the larger n=119 run (see Robustness below)._
 
 ### Attention ≠ Importance
 
 One of the most striking findings: **the head that looks at the subject most is not the head that matters most.**
 
-- L4H3 puts 46.8% of its attention on the subject — but contributes only 11.7% of the causal effect.
-- L7H4 puts just 2.9% of its attention on the subject — yet contributes 31.3% of the causal effect.
+- L4H3 puts 46.8% of its attention on the subject — but contributes only 11.7% of the causal effect (first-pass, n=8; see Robustness (n=119) below).
+- L7H4 puts just 2.9% of its attention on the subject — yet contributes 31.3% of the causal effect (first-pass, n=8; see Robustness (n=119) below).
 
 This happens because L7H4 doesn't need to look at the subject directly. Earlier heads (L4H3) have already written subject-number information into the residual stream. L7H4 reads that processed information from structural positions like relative pronouns and prepositions, then translates it into the correct verb prediction. Information flows through the residual stream, not through direct token-to-token attention.
 
 ![Attention vs Causation](figures/attention_vs_causation.png)
-_Side-by-side comparison (Section 8): attention paid to the subject vs. actual causal importance for each key head. L4H3 dominates attention; L7H4 dominates causation._
+_Side-by-side comparison on the validated n=119 set (Section 9), with SEM error bars: attention paid to the subject vs. actual causal importance for each key head. L4H3 dominates attention yet ranks low on causal effect; L7H4 barely attends to the subject yet dominates causation._
 
 ### Sparsity
 
@@ -38,6 +38,15 @@ Out of 144 total attention heads, 140 contribute less than 5% each. The model co
 
 ![Attention Patterns](figures/attention_patterns.png)
 _CircuitsVis attention pattern visualization for one of the key subject-tracking heads (Section 2/3)._
+
+### Robustness (n=119)
+
+To check that the first pass wasn't an artifact of eight hand-picked sentences, we scaled up to **119 balanced minimal pairs** (60 "is" / 59 "are"), each pair differing only in the subject's number (Section 9).
+
+- **Balanced baseline.** The model reaches 99.2% baseline accuracy across both agreement directions, ruling out a simple "is"-bias.
+- **A stable 3-head core.** Per-head causal effects, reported as mean ± SEM with tight error bars (±0.3–0.8%), confirm L7H4 (26%), L8H5 (25%), and L10H9 (17%) as the causal core, followed by a diffuse tail of smaller contributors.
+- **L4H3 is the subject-detector, not a decision-maker.** At n=119, L4H3 falls to ~6th by causal effect (7.2%), behind L6H0 and L10H5. It remains the head that attends most to the subject — reinforcing that the head that looks at the subject is not among the heads that decide the verb.
+- **Necessary but partially redundant.** Mean-ablating the top-4 heads drops accuracy from 99.2% to 65.0% — removing ~70% of the model's above-chance ability against a 50% chance floor — while ablating 4 random heads leaves it at 98.5%. The circuit is necessary but partially redundant, consistent with the backup heads seen in other GPT-2 circuits (e.g. IOI).
 
 ## Methodology
 
